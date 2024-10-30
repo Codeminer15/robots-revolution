@@ -1,0 +1,14 @@
+#content {
+  display: grid;
+  min-height: 100dvh;
+  grid-template-rows: auto 1fr auto;
+
+  header, footer {
+    color: var(--mat-app-text-color);
+    background-color: var(--mat-app-background-color);
+  }
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
