@@ -1,6 +1,6 @@
 <section id="content">
   <header>
-    <mat-toolbar>
+    <mat-toolbar [ngClass]="{ 'visually-hidden': o.isActivated && o.activatedRoute.snapshot.url[0].path == 'home' }">
       <span>{{ title }}</span>
       <span class="spacer"></span>
       <button type="button" mat-icon-button>
@@ -12,11 +12,13 @@
     </mat-toolbar>
   </header>
 
-  <main>
-    <router-outlet />
+  <main [@fadeAnimation]="o.isActivated ? o.activatedRoute : ''">
+    <router-outlet #o="outlet"/>
   </main>
 
   <footer>
-    <p>Footer</p>
+    <section [ngClass]="{ 'visually-hidden': o.isActivated && o.activatedRoute.snapshot.url[0].path == 'home' }">
+      <p>Footer</p>
+    </section>
   </footer>
 </section>

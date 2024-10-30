@@ -1,0 +1,28 @@
+section {
+  display: grid;
+  place-items: center;
+
+  background-image: url("../../../../public/pictures/home-background.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.handjet-title {
+  color: white;
+  font-size: clamp(65px, 90px, 120px);
+  text-align: center;
+  font-family: "Handjet", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  font-variation-settings: "ELGR" 1, "ELSH" 2;
+}
+
+#start-button {
+  box-shadow: #FFF 0 0 20px;
+}
+
+#volume-button {
+  box-shadow: #FFF 0 0 10px;
+}
