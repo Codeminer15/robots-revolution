@@ -4,10 +4,10 @@
       <span>{{ title }}</span>
       <span class="spacer"></span>
       <button type="button" mat-icon-button>
-        <mat-icon>restart_alt</mat-icon>
+        <mat-icon>volume_up</mat-icon>
       </button>
       <button type="button" mat-icon-button>
-        <mat-icon>volume_up</mat-icon>
+        <mat-icon>info</mat-icon>
       </button>
     </mat-toolbar>
   </header>
@@ -17,8 +17,8 @@
   </main>
 
   <footer>
-    <section [ngClass]="{ 'visually-hidden': o.isActivated && o.activatedRoute.snapshot.url[0].path == 'home' }">
-      <p>Footer</p>
+    <section class="text-center" [ngClass]="{ 'visually-hidden': o.isActivated && o.activatedRoute.snapshot.url[0].path == 'home' }">
+      <p>&copy; Todos los derechos reservados</p>
     </section>
   </footer>
 </section>

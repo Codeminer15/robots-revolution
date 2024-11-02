@@ -1,1 +1,70 @@
-<p>game works!</p>
+<section class="container-fluid h-100" cdkDropListGroup>
+  <section class="row text-center">
+    <p>Movimientos de la capsula: {{ counter }}</p>
+  </section>
+  <section class="row h-100">
+    <div id="lab-1" class="col-4">
+      <h6 class="text-center">Laboratorio Izquierdo</h6>
+      <div #lab1 class="list" #list1="cdkDropList" cdkDropList
+           [cdkDropListConnectedTo]="[list2]"
+           [cdkDropListData]="scientistAndRobotsLeft"
+           (cdkDropListDropped)="dropLeft($event)">
+        @for (item of scientistAndRobotsLeft; track $index + item) {
+          <div class="box" cdkDrag [cdkDragDisabled]="!capsuleDirection">
+            <img [src]="'pictures/' + item + '.png'" [alt]="item" class="img-fluid"/>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="col-4">
+      <section class="text-center mb-2">
+        <h6 class="mb-2">Capsula</h6>
+        <button id="move-button" type="button" mat-icon-button matTooltip="Mover capsula"
+                (click)="moveTo()" [disabled]="isMoving">
+          @if (capsuleDirection) {
+            <mat-icon>east</mat-icon>
+          } @else {
+            <mat-icon>west</mat-icon>
+          }
+        </button>
+      </section>
+      <section id="capsules" class="row">
+        <div #leftContainer id="left-capsule" class="col-6">
+          <div #capsuleDiv class="capsule-div h-100" #list2="cdkDropList" cdkDropList
+               [cdkDropListConnectedTo]="[list1, list3]"
+               [cdkDropListData]="capsule"
+               (cdkDropListDropped)="drop($event)">
+            @for (item of capsule; track $index + item) {
+              <div class="box" cdkDrag>
+                <img [src]="'pictures/' + item + '.png'" [alt]="item" class="img-fluid"/>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div #rightContainer id="right-capsule" class="col-6">
+
+        </div>
+      </section>
+    </div>
+
+    <div id="lab-2" class="col-4">
+      <h6 class="text-center">Laboratorio Derecho</h6>
+      <div #lab2 class="list" #list3="cdkDropList" cdkDropList
+           [cdkDropListConnectedTo]="[list2]"
+           [cdkDropListData]="scientistAndRobotsRight"
+           (cdkDropListDropped)="dropRight($event)">
+        @for (item of scientistAndRobotsRight; track item) {
+          <div class="box" cdkDrag [cdkDragDisabled]="capsuleDirection">
+            <img [src]="'pictures/' + item + '.png'" [alt]="item" width="100"/>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+</section>
+
+<button type="button" mat-fab class="position-fixed end-0 bottom-0 m-4" matTooltip="Reiniciar juego" (click)="resetGame()">
+  <mat-icon>restart_alt</mat-icon>
+</button>
