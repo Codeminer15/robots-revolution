@@ -3,8 +3,8 @@
     <mat-toolbar [ngClass]="{ 'visually-hidden': o.isActivated && o.activatedRoute.snapshot.url[0].path == 'home' }">
       <span>{{ title }}</span>
       <span class="spacer"></span>
-      <button type="button" mat-icon-button>
-        <mat-icon>volume_up</mat-icon>
+      <button type="button" mat-icon-button (click)="toggleAudio()">
+        <mat-icon>{{ audio.paused ? 'volume_off' : 'volume_up' }}</mat-icon>
       </button>
       <button type="button" mat-icon-button>
         <mat-icon>info</mat-icon>
