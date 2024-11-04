@@ -1,4 +1,4 @@
-import { Component, ElementRef, Renderer2, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Inject, Renderer2, ViewChild,  inject } from '@angular/core';
 import { fadeAnimation, moveAnimation } from '../../animatios';
 import {
   CdkDrag,
@@ -8,9 +8,19 @@ import {
   moveItemInArray,
   transferArrayItem
 } from '@angular/cdk/drag-drop';
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogActions,
+  MatDialogClose,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-game',
@@ -21,13 +31,16 @@ import { MatIconModule } from '@angular/material/icon';
     CdkDrag,
     MatButtonModule,
     MatTooltip,
-    MatIconModule
+    MatIconModule,
   ],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
-  animations: [fadeAnimation, moveAnimation]
+  animations: [fadeAnimation, moveAnimation],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GameComponent {
+  dialog = inject(MatDialog)
+
   @ViewChild('capsuleDiv', { static: true }) capsuleDiv!: ElementRef;
   @ViewChild('leftContainer', { static: true }) leftContainer!: ElementRef
   @ViewChild('rightContainer', { static: true }) rightContainer!: ElementRef
@@ -43,7 +56,19 @@ export class GameComponent {
   isMoving: boolean = false;
   counter: number = 0;
 
-  constructor(private renderer: Renderer2) { }
+  openDialog() {
+    const dialogRef = this.dialog.open(DialogCustom,{
+      disableClose: true, //evita que se cierre al hacer clic fuera de él
+      panelClass: 'my-class' 
+    });
+    dialogRef.afterClosed().subscribe((result: boolean) => {
+      if(result) this.resetGame()
+      else    this.router.navigate(["../home"])
+        
+    })
+  }
+
+  constructor(private renderer: Renderer2, private router: Router) { }
 
   dropLeft(event: CdkDragDrop<string[]>) {
     if (event.previousContainer === event.container) {
@@ -118,4 +143,38 @@ export class GameComponent {
     this.isMoving = false;
     this.counter = 0;
   }
+
 }
+
+@Component({
+  selector: 'app-dialog',
+  standalone: true,
+  styleUrl:"./game.component.scss",
+  template:  `
+  <mat-dialog-content>
+    @if (statusGame) {
+      <h2 mat-dialog-title>¡HAZ GANADO!</h2>
+    }@else {
+      <h2 mat-dialog-title>¡HAZ PERDIDO!</h2>
+    }
+    <mat-dialog-actions>
+      <button mat-button mat-dialog-close (click)="dialogRef.close(false)">
+        <mat-icon>home</mat-icon>
+        Volver al inicio
+      </button>
+      <button mat-button mat-dialog-close (click)="dialogRef.close(true)">
+        <mat-icon>reset</mat-icon>
+        Nueva Partida
+      </button>
+    </mat-dialog-actions>
+    <mat-dialog-content>
+  `,
+  imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose, MatButtonModule,MatIconModule],
+  
+})
+export class DialogCustom {
+  dialogRef = inject(MatDialogRef<DialogCustom>);
+
+  statusGame : boolean = true
+}
+

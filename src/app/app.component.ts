@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
@@ -22,4 +22,18 @@ import { NgClass } from '@angular/common';
 })
 export class AppComponent {
   title = 'Robots Revolution';
+  audio = new Audio("/audio/stranger-things.mp3");
+
+  // OnInit(){
+  //   this.audio.play().catch(error =>{
+  //     console.warn("El navegador no permite la reproducción automatica");
+  //   });
+  // }
+  toggleAudio(){
+    if(this.audio.paused){
+      this.audio.play()
+    } else {
+      this.audio.pause()
+    }
+  }
 }
