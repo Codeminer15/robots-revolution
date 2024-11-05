@@ -1,4 +1,4 @@
-import { Component, ElementRef, Renderer2, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, Renderer2, TemplateRef, ViewChild } from '@angular/core';
 import { fadeAnimation, moveAnimation } from '../../animatios';
 import {
   CdkDrag,
@@ -11,6 +11,10 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { GAME_STATE } from '../../types';
+import { RouterLink } from '@angular/router';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-game',
@@ -21,29 +25,98 @@ import { MatIconModule } from '@angular/material/icon';
     CdkDrag,
     MatButtonModule,
     MatTooltip,
-    MatIconModule
+    MatIconModule,
+    MatDialogModule,
+    RouterLink
   ],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
   animations: [fadeAnimation, moveAnimation]
 })
 export class GameComponent {
+  readonly dialog = inject(MatDialog);
+  readonly snackbar = inject(MatSnackBar);
+
   @ViewChild('capsuleDiv', { static: true }) capsuleDiv!: ElementRef;
   @ViewChild('leftContainer', { static: true }) leftContainer!: ElementRef
   @ViewChild('rightContainer', { static: true }) rightContainer!: ElementRef
   @ViewChild('lab1', { static: true }) lab1!: ElementRef
   @ViewChild('lab2', { static: true }) lab2!: ElementRef
+  @ViewChild('finishDialog') finishDialog!: TemplateRef<any>;
 
   scientistAndRobotsLeft: string[] = ['robot', 'robot', 'robot', 'scientist', 'scientist', 'scientist'];
   scientistAndRobotsRight: string[] = [];
 
   capsule: string[] = [];
-  capsuleDirection: boolean = true; // true == Right and false == Left
+  capsuleDirection: boolean = true; // true == Left and false == Right
 
   isMoving: boolean = false;
   counter: number = 0;
+  gameState: GAME_STATE = 'running';
 
   constructor(private renderer: Renderer2) { }
+
+  defineLost() {
+    const robotsLeft = this.scientistAndRobotsLeft
+      .filter((item: string)=> item === 'robot').length;
+    const robotsRight = this.scientistAndRobotsRight
+      .filter((item: string)=> item === 'robot').length;
+    const scientistLeft = this.scientistAndRobotsLeft
+      .filter((item: string)=> item === 'scientist').length;
+    const scientistRight = this.scientistAndRobotsRight
+      .filter((item: string)=> item === 'scientist').length;
+
+    switch (this.capsuleDirection) {
+      case true:
+        if (robotsLeft > scientistLeft && scientistLeft > 0) {
+          //console.log('The laboratory 1\'s scientist are low!');
+          this.gameState = 'wasted';
+          this.scientistAndRobotsLeft = this.scientistAndRobotsLeft
+            .map((item: string)=> item === 'scientist' ? 'blood' : item);
+          this.dialog.open(this.finishDialog,
+            {
+              disableClose: true,
+              closeOnNavigation: true,
+              enterAnimationDuration: '250ms',
+              exitAnimationDuration: '200ms',
+            }
+          );
+        }
+        break;
+      case false:
+        if (robotsRight > scientistRight && scientistRight > 0) {
+          //console.log('The laboratory 2\'s scientist are low!');
+          this.gameState = 'wasted';
+          this.scientistAndRobotsRight = this.scientistAndRobotsRight
+            .map((item: string)=> item === 'scientist' ? 'blood' : item);
+          this.dialog.open(this.finishDialog,
+            {
+              disableClose: true,
+              closeOnNavigation: true,
+              enterAnimationDuration: '250ms',
+              exitAnimationDuration: '200ms'
+            }
+          );
+        }
+        break;
+    }
+  }
+
+  defineWon() {
+    if (this.scientistAndRobotsRight.length === 6
+      && this.scientistAndRobotsLeft.length === 0
+      && this.capsule.length === 0) {
+      this.gameState = 'won';
+      this.dialog.open(this.finishDialog,
+        {
+          disableClose: true,
+          closeOnNavigation: true,
+          enterAnimationDuration: '250ms',
+          exitAnimationDuration: '200ms',
+        }
+      );
+    }
+  }
 
   dropLeft(event: CdkDragDrop<string[]>) {
     if (event.previousContainer === event.container) {
@@ -66,6 +139,8 @@ export class GameComponent {
         event.previousIndex,
         event.currentIndex,
       );
+    } else {
+      this.snackbar.open('¡Capacidad máxima de la cápsula alcanzada!', 'Aceptar', { duration: 1500 })
     }
   }
 
@@ -80,10 +155,15 @@ export class GameComponent {
         event.currentIndex,
       );
     }
+    this.defineWon();
   }
 
   moveTo() {
-    if (this.capsule.length < 1) return;
+    if (this.capsule.length < 1) {
+      this.snackbar.open('La cápsula no puede dirigirse hacia el otro laboratorio sin tripulantes.',
+        'Aceptar', { duration: 2000 });
+      return;
+    }
 
     this.isMoving = true;
 
@@ -93,16 +173,17 @@ export class GameComponent {
     //const previousLab = (this.capsuleDirection) ? this.lab1.nativeElement : this.lab2.nativeElement;
     const animationClass = (this.capsuleDirection) ? 'move-to-right' : 'move-to-left';
 
+    this.counter++;
     this.renderer.addClass(div, animationClass);
     setTimeout(() => {
       this.renderer.appendChild(target, div);
       this.renderer.removeClass(div, animationClass);
       this.capsuleDirection = !this.capsuleDirection;
       this.isMoving = false;
-      this.counter++;
       //this.renderer.addClass(previousLab, 'inactive');
       //this.renderer.removeClass(targetLab, 'inactive');
       }, 500);
+    this.defineLost();
   }
 
   resetGame() {
@@ -117,5 +198,6 @@ export class GameComponent {
     this.capsuleDirection = true;
     this.isMoving = false;
     this.counter = 0;
+    this.gameState = 'running';
   }
 }
