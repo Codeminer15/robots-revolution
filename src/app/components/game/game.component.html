@@ -66,7 +66,7 @@
 </section>
 
 <button type="button" mat-fab class="position-fixed end-0 bottom-0 m-4"
-        matTooltip="Reiniciar juego" (click)="dialog.open(resetDialog)">
+        matTooltip="Reiniciar juego" (click)="counter > 0 ? dialog.open(resetDialog) : undefined">
   <mat-icon>restart_alt</mat-icon>
 </button>
 
@@ -91,7 +91,7 @@
     <p>Número de movimientos realizados: <b>{{ counter }}</b></p>
   </mat-dialog-content>
   <mat-dialog-actions>
-    <button mat-button routerLink="../home" mat-dialog-close>Volver al inicio</button>
+    <button mat-button routerLink="./home" mat-dialog-close>Volver al inicio</button>
     <button mat-flat-button (click)="resetGame()" mat-dialog-close>Jugar de nuevo</button>
   </mat-dialog-actions>
 </ng-template>

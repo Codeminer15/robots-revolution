@@ -1,11 +1,14 @@
 <section id="content">
   <header>
     <mat-toolbar [ngClass]="{ 'visually-hidden': o.isActivated && o.activatedRoute.snapshot.url[0].path == 'home' }">
-      <span>{{ title }}</span>
-      <span class="spacer"></span>
-      <button type="button" mat-icon-button>
-        <mat-icon>volume_up</mat-icon>
+      <button type="button" mat-icon-button (click)="dialog.open(backDialog)">
+        <mat-icon>arrow_back</mat-icon>
       </button>
+      <span class="m-1">{{ title }}</span>
+      <span class="spacer"></span>
+      <!--<button type="button" mat-icon-button>
+        <mat-icon>volume_up</mat-icon>
+      </button>-->
       <button type="button" mat-icon-button>
         <mat-icon>info</mat-icon>
       </button>
@@ -22,3 +25,13 @@
     </section>
   </footer>
 </section>
+
+<ng-template #backDialog>
+  <mat-dialog-content>
+    <p>¿Estás seguro que desea salir del juego actual?</p>
+  </mat-dialog-content>
+  <mat-dialog-actions>
+    <button mat-flat-button mat-dialog-close>No, continuar</button>
+    <button mat-button mat-dialog-close routerLink="../home">Sí, salir</button>
+  </mat-dialog-actions>
+</ng-template>
