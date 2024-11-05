@@ -9,7 +9,7 @@
       <!--<button type="button" mat-icon-button>
         <mat-icon>volume_up</mat-icon>
       </button>-->
-      <button type="button" mat-icon-button>
+      <button type="button" mat-icon-button (click)="dialog.open(infoDialog)">
         <mat-icon>info</mat-icon>
       </button>
     </mat-toolbar>
@@ -33,5 +33,33 @@
   <mat-dialog-actions>
     <button mat-flat-button mat-dialog-close>No, continuar</button>
     <button mat-button mat-dialog-close routerLink="../home">Sí, salir</button>
+  </mat-dialog-actions>
+</ng-template>
+
+<ng-template #infoDialog>
+  <h4 mat-dialog-title class="text-center">Información del juego</h4>
+  <mat-dialog-content style="text-align: justify">
+    <ol>
+      <li>Sobre el juego</li>
+      <p>
+        "Robots Revolution" es un juego simple donde tienes que evitar la revelación de los robots ante la humanidad.
+        Se tienen dos laboratorios y una capsula que traslada científicos y robots de un lado a otro, el objetivo del juego
+        es lograr mover a los científicos y robots al otro laboratorio evitando que el número de robots supere al número de
+        científicos en cualquiera de los dos laboratorios. Si esto llega a pasar, los robots aniquilarán a los científicos
+        y la humanidad estará condenada.
+      </p>
+      <li>Reglas de juego</li>
+      <ol type="I">
+        <li>La cápsula puede transportar a uno o dos pasajeros, ya sean científicos o robots.</li>
+        <li>La cápsula puede trasladarse vacía a uno u otro laboratorio.</li>
+        <li>Solo pueden subir a la cápsula los pasajeros que se encuentren del lado de esta.</li>
+        <li>Se pueden enviar pasajeros de un laboratorio a otro sin problema alguno.</li>
+        <li>No pueden quedar menos científicos que robots en algunos de los laboratorios, a menos que los robots se queden solos.</li>
+        <li>Para ganar el juego se deben pasar los 3 científicos y los 3 robots al segundo laboratorio.</li>
+      </ol>
+    </ol>
+  </mat-dialog-content>
+  <mat-dialog-actions>
+    <button mat-button mat-dialog-close>Aceptar</button>
   </mat-dialog-actions>
 </ng-template>
