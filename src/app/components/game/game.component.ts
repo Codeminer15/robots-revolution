@@ -14,7 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { GAME_STATE } from '../../types';
 import { RouterLink } from '@angular/router';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-game',
@@ -53,6 +53,12 @@ export class GameComponent {
   isMoving: boolean = false;
   counter: number = 0;
   gameState: GAME_STATE = 'running';
+  dialogConfig: Object = {
+    disableClose: true,
+    closeOnNavigation: true,
+    enterAnimationDuration: '250ms',
+    exitAnimationDuration: '200ms',
+  }
 
   constructor(private renderer: Renderer2) { }
 
@@ -73,14 +79,11 @@ export class GameComponent {
           this.gameState = 'wasted';
           this.scientistAndRobotsLeft = this.scientistAndRobotsLeft
             .map((item: string)=> item === 'scientist' ? 'blood' : item);
-          this.dialog.open(this.finishDialog,
-            {
-              disableClose: true,
-              closeOnNavigation: true,
-              enterAnimationDuration: '250ms',
-              exitAnimationDuration: '200ms',
-            }
-          );
+          this.scientistAndRobotsRight = this.scientistAndRobotsRight
+            .map((item: string)=> item === 'scientist' ? 'blood' : item);
+          this.capsule = this.capsule
+            .map((item: string)=> item === 'scientist' ? 'blood' : item);
+          this.dialog.open(this.finishDialog, this.dialogConfig);
         }
         break;
       case false:
@@ -89,14 +92,11 @@ export class GameComponent {
           this.gameState = 'wasted';
           this.scientistAndRobotsRight = this.scientistAndRobotsRight
             .map((item: string)=> item === 'scientist' ? 'blood' : item);
-          this.dialog.open(this.finishDialog,
-            {
-              disableClose: true,
-              closeOnNavigation: true,
-              enterAnimationDuration: '250ms',
-              exitAnimationDuration: '200ms'
-            }
-          );
+          this.scientistAndRobotsLeft = this.scientistAndRobotsLeft
+            .map((item: string)=> item === 'scientist' ? 'blood' : item);
+          this.capsule = this.capsule
+            .map((item: string)=> item === 'scientist' ? 'blood' : item);
+          this.dialog.open(this.finishDialog, this.dialogConfig);
         }
         break;
     }
