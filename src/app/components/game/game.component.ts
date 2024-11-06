@@ -72,33 +72,29 @@ export class GameComponent {
     const scientistRight = this.scientistAndRobotsRight
       .filter((item: string)=> item === 'scientist').length;
 
-    switch (this.capsuleDirection) {
-      case true:
-        if (robotsLeft > scientistLeft && scientistLeft > 0) {
-          //console.log('The laboratory 1\'s scientist are low!');
-          this.gameState = 'wasted';
-          this.scientistAndRobotsLeft = this.scientistAndRobotsLeft
-            .map((item: string)=> item === 'scientist' ? 'blood' : item);
-          this.scientistAndRobotsRight = this.scientistAndRobotsRight
-            .map((item: string)=> item === 'scientist' ? 'blood' : item);
-          this.capsule = this.capsule
-            .map((item: string)=> item === 'scientist' ? 'blood' : item);
-          this.dialog.open(this.finishDialog, this.dialogConfig);
-        }
-        break;
-      case false:
-        if (robotsRight > scientistRight && scientistRight > 0) {
-          //console.log('The laboratory 2\'s scientist are low!');
-          this.gameState = 'wasted';
-          this.scientistAndRobotsRight = this.scientistAndRobotsRight
-            .map((item: string)=> item === 'scientist' ? 'blood' : item);
-          this.scientistAndRobotsLeft = this.scientistAndRobotsLeft
-            .map((item: string)=> item === 'scientist' ? 'blood' : item);
-          this.capsule = this.capsule
-            .map((item: string)=> item === 'scientist' ? 'blood' : item);
-          this.dialog.open(this.finishDialog, this.dialogConfig);
-        }
-        break;
+    if (robotsLeft > scientistLeft && scientistLeft > 0) {
+      //console.log('The laboratory 1\'s scientist are low!');
+      this.gameState = 'wasted';
+      this.scientistAndRobotsLeft = this.scientistAndRobotsLeft
+        .map((item: string)=> item === 'scientist' ? 'blood' : item);
+      this.scientistAndRobotsRight = this.scientistAndRobotsRight
+        .map((item: string)=> item === 'scientist' ? 'blood' : item);
+      this.capsule = this.capsule
+        .map((item: string)=> item === 'scientist' ? 'blood' : item);
+      this.dialog.open(this.finishDialog, this.dialogConfig);
+      return;
+    }
+
+    if (robotsRight > scientistRight && scientistRight > 0) {
+      //console.log('The laboratory 2\'s scientist are low!');
+      this.gameState = 'wasted';
+      this.scientistAndRobotsRight = this.scientistAndRobotsRight
+        .map((item: string) => item === 'scientist' ? 'blood' : item);
+      this.scientistAndRobotsLeft = this.scientistAndRobotsLeft
+        .map((item: string) => item === 'scientist' ? 'blood' : item);
+      this.capsule = this.capsule
+        .map((item: string) => item === 'scientist' ? 'blood' : item);
+      this.dialog.open(this.finishDialog, this.dialogConfig);
     }
   }
 
@@ -155,7 +151,7 @@ export class GameComponent {
         event.currentIndex,
       );
     }
-    this.defineWon();
+    //this.defineWon();
   }
 
   moveTo() {
@@ -178,12 +174,23 @@ export class GameComponent {
     setTimeout(() => {
       this.renderer.appendChild(target, div);
       this.renderer.removeClass(div, animationClass);
+
+      if (this.capsuleDirection) {
+        this.scientistAndRobotsRight.push(...this.capsule);
+        this.capsule = [];
+      } else {
+        this.scientistAndRobotsLeft.push(...this.capsule);
+        this.capsule = [];
+      }
+
       this.capsuleDirection = !this.capsuleDirection;
       this.isMoving = false;
+
+      this.defineLost();
+      this.defineWon();
       //this.renderer.addClass(previousLab, 'inactive');
       //this.renderer.removeClass(targetLab, 'inactive');
       }, 500);
-    this.defineLost();
   }
 
   resetGame() {
