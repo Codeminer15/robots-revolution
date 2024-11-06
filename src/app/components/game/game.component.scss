@@ -1,3 +1,8 @@
+.s {
+  //border-radius: 30px;
+  box-shadow: #ccc 0 0 30px;
+}
+
 h6 {
   margin: 0;
   background-color: var(--mat-app-background-color);
@@ -12,7 +17,7 @@ h6 {
   padding: 15px;
   //border: solid 1px #ccc;
   border-radius: 4px;
-  overflow: hidden;
+  overflow: auto;
   display: grid;
   place-items: center;
   grid-template-columns: repeat(3, 1fr);
@@ -52,7 +57,7 @@ h6 {
   place-items: center;
   align-content: center;
   gap: 10px;
-  border: solid 1px #ccc;
+  border: solid 5px #ccc;
 }
 
 .box {
@@ -115,12 +120,6 @@ h6 {
 
 .move-to-left {
   animation: moveToLeft 0.5s ease-in-out forwards;
-}
-
-//MAT-DIALOG
-
-.my-class .mat-dialog-content{
-  box-shadow: #FFF 0 0 10px;
 }
 
 

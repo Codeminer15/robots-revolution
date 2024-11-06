@@ -2,16 +2,15 @@
   <section class="row text-center">
     <p>Movimientos de la capsula: {{ counter }}</p>
   </section>
-  <button (click)="openDialog()">Watch</button>
   <section class="row h-100">
     <div id="lab-1" class="col-4">
-      <h6 class="text-center">Laboratorio Izquierdo</h6>
+      <h6 class="text-center">Laboratorio 1</h6>
       <div #lab1 class="list" #list1="cdkDropList" cdkDropList
            [cdkDropListConnectedTo]="[list2]"
            [cdkDropListData]="scientistAndRobotsLeft"
            (cdkDropListDropped)="dropLeft($event)">
         @for (item of scientistAndRobotsLeft; track $index + item) {
-          <div class="box" cdkDrag [cdkDragDisabled]="!capsuleDirection">
+          <div class="box" cdkDrag [cdkDragDisabled]="!capsuleDirection || gameState !== 'running'">
             <img [src]="'pictures/' + item + '.png'" [alt]="item" class="img-fluid"/>
           </div>
         }
@@ -20,8 +19,8 @@
 
     <div class="col-4">
       <section class="text-center mb-2">
-        <h6 class="mb-2">Capsula</h6>
-        <button id="move-button" type="button" mat-icon-button matTooltip="Mover capsula"
+        <h6 class="mb-2">Cápsula</h6>
+        <button id="move-button" type="button" mat-icon-button matTooltip="Mover cápsula"
                 (click)="moveTo()" [disabled]="isMoving">
           @if (capsuleDirection) {
             <mat-icon>east</mat-icon>
@@ -37,7 +36,7 @@
                [cdkDropListData]="capsule"
                (cdkDropListDropped)="drop($event)">
             @for (item of capsule; track $index + item) {
-              <div class="box" cdkDrag>
+              <div class="box" cdkDrag [cdkDragDisabled]="gameState !== 'running'">
                 <img [src]="'pictures/' + item + '.png'" [alt]="item" class="img-fluid"/>
               </div>
             }
@@ -51,13 +50,13 @@
     </div>
 
     <div id="lab-2" class="col-4">
-      <h6 class="text-center">Laboratorio Derecho</h6>
+      <h6 class="text-center">Laboratorio 2</h6>
       <div #lab2 class="list" #list3="cdkDropList" cdkDropList
            [cdkDropListConnectedTo]="[list2]"
            [cdkDropListData]="scientistAndRobotsRight"
            (cdkDropListDropped)="dropRight($event)">
-        @for (item of scientistAndRobotsRight; track item) {
-          <div class="box" cdkDrag [cdkDragDisabled]="capsuleDirection">
+        @for (item of scientistAndRobotsRight; track $index + item) {
+          <div class="box" cdkDrag [cdkDragDisabled]="capsuleDirection || gameState !== 'running'">
             <img [src]="'pictures/' + item + '.png'" [alt]="item" width="100"/>
           </div>
         }
@@ -66,6 +65,43 @@
   </section>
 </section>
 
-<button type="button" mat-fab class="position-fixed end-0 bottom-0 m-4" matTooltip="Reiniciar juego" (click)="resetGame()">
+<button type="button" mat-fab class="position-fixed end-0 bottom-0 m-4"
+        matTooltip="Reiniciar juego" (click)="counter > 0 ? dialog.open(resetDialog) : undefined">
   <mat-icon>restart_alt</mat-icon>
 </button>
+
+<ng-template #finishDialog>
+  <h3 mat-dialog-title class="text-center">
+    @if (gameState === 'won') {
+      Buen juego 😎
+    }
+    @if (gameState === 'wasted') {
+      Fin del juego 😢
+    }
+  </h3>
+  <mat-dialog-content class="text-center">
+    <p>
+      @if (gameState === 'won') {
+        Los científicos están a salvo de la rebelión de los robots.
+      }
+      @if (gameState === 'wasted') {
+        Los robots se han rebelado y los científicos han sido exterminados.
+      }
+    </p>
+    <p>Número de movimientos realizados: <b>{{ counter }}</b></p>
+  </mat-dialog-content>
+  <mat-dialog-actions>
+    <button mat-button routerLink="../home" mat-dialog-close>Volver al inicio</button>
+    <button mat-flat-button (click)="resetGame()" mat-dialog-close>Jugar de nuevo</button>
+  </mat-dialog-actions>
+</ng-template>
+
+<ng-template #resetDialog>
+  <mat-dialog-content>
+    <p>¿Estás seguro que desea reiniciar el juego actual?</p>
+  </mat-dialog-content>
+  <mat-dialog-actions>
+    <button mat-flat-button mat-dialog-close>No, continuar</button>
+    <button mat-button (click)="resetGame()" mat-dialog-close>Sí, reiniciar</button>
+  </mat-dialog-actions>
+</ng-template>

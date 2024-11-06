@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Inject, Renderer2, ViewChild,  inject } from '@angular/core';
+import { Component, ElementRef, inject, Renderer2, TemplateRef, ViewChild } from '@angular/core';
 import { fadeAnimation, moveAnimation } from '../../animatios';
 import {
   CdkDrag,
@@ -8,19 +8,13 @@ import {
   moveItemInArray,
   transferArrayItem
 } from '@angular/cdk/drag-drop';
-import {
-  MAT_DIALOG_DATA,
-  MatDialog,
-  MatDialogActions,
-  MatDialogClose,
-  MatDialogContent,
-  MatDialogRef,
-  MatDialogTitle,
-} from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
-import { Router, RouterLink } from '@angular/router';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { GAME_STATE } from '../../types';
+import { RouterLink } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-game',
@@ -32,43 +26,93 @@ import { Router, RouterLink } from '@angular/router';
     MatButtonModule,
     MatTooltip,
     MatIconModule,
+    MatDialogModule,
+    RouterLink
   ],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
-  animations: [fadeAnimation, moveAnimation],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [fadeAnimation, moveAnimation]
 })
 export class GameComponent {
-  dialog = inject(MatDialog)
+  readonly dialog = inject(MatDialog);
+  readonly snackbar = inject(MatSnackBar);
 
   @ViewChild('capsuleDiv', { static: true }) capsuleDiv!: ElementRef;
   @ViewChild('leftContainer', { static: true }) leftContainer!: ElementRef
   @ViewChild('rightContainer', { static: true }) rightContainer!: ElementRef
   @ViewChild('lab1', { static: true }) lab1!: ElementRef
   @ViewChild('lab2', { static: true }) lab2!: ElementRef
+  @ViewChild('finishDialog') finishDialog!: TemplateRef<any>;
 
   scientistAndRobotsLeft: string[] = ['robot', 'robot', 'robot', 'scientist', 'scientist', 'scientist'];
   scientistAndRobotsRight: string[] = [];
 
   capsule: string[] = [];
-  capsuleDirection: boolean = true; // true == Right and false == Left
+  capsuleDirection: boolean = true; // true == Left and false == Right
 
   isMoving: boolean = false;
   counter: number = 0;
-
-  openDialog() {
-    const dialogRef = this.dialog.open(DialogCustom,{
-      disableClose: true, //evita que se cierre al hacer clic fuera de él
-      panelClass: 'my-class' 
-    });
-    dialogRef.afterClosed().subscribe((result: boolean) => {
-      if(result) this.resetGame()
-      else    this.router.navigate(["../home"])
-        
-    })
+  gameState: GAME_STATE = 'running';
+  dialogConfig: Object = {
+    disableClose: true,
+    closeOnNavigation: true,
+    enterAnimationDuration: '250ms',
+    exitAnimationDuration: '200ms',
   }
 
-  constructor(private renderer: Renderer2, private router: Router) { }
+  constructor(private renderer: Renderer2) { }
+
+  defineLost() {
+    const robotsLeft = this.scientistAndRobotsLeft
+      .filter((item: string)=> item === 'robot').length;
+    const robotsRight = this.scientistAndRobotsRight
+      .filter((item: string)=> item === 'robot').length;
+    const scientistLeft = this.scientistAndRobotsLeft
+      .filter((item: string)=> item === 'scientist').length;
+    const scientistRight = this.scientistAndRobotsRight
+      .filter((item: string)=> item === 'scientist').length;
+
+    if (robotsLeft > scientistLeft && scientistLeft > 0) {
+      //console.log('The laboratory 1\'s scientist are low!');
+      this.gameState = 'wasted';
+      this.scientistAndRobotsLeft = this.scientistAndRobotsLeft
+        .map((item: string)=> item === 'scientist' ? 'blood' : item);
+      this.scientistAndRobotsRight = this.scientistAndRobotsRight
+        .map((item: string)=> item === 'scientist' ? 'blood' : item);
+      this.capsule = this.capsule
+        .map((item: string)=> item === 'scientist' ? 'blood' : item);
+      this.dialog.open(this.finishDialog, this.dialogConfig);
+      return;
+    }
+
+    if (robotsRight > scientistRight && scientistRight > 0) {
+      //console.log('The laboratory 2\'s scientist are low!');
+      this.gameState = 'wasted';
+      this.scientistAndRobotsRight = this.scientistAndRobotsRight
+        .map((item: string) => item === 'scientist' ? 'blood' : item);
+      this.scientistAndRobotsLeft = this.scientistAndRobotsLeft
+        .map((item: string) => item === 'scientist' ? 'blood' : item);
+      this.capsule = this.capsule
+        .map((item: string) => item === 'scientist' ? 'blood' : item);
+      this.dialog.open(this.finishDialog, this.dialogConfig);
+    }
+  }
+
+  defineWon() {
+    if (this.scientistAndRobotsRight.length === 6
+      && this.scientistAndRobotsLeft.length === 0
+      && this.capsule.length === 0) {
+      this.gameState = 'won';
+      this.dialog.open(this.finishDialog,
+        {
+          disableClose: true,
+          closeOnNavigation: true,
+          enterAnimationDuration: '250ms',
+          exitAnimationDuration: '200ms',
+        }
+      );
+    }
+  }
 
   dropLeft(event: CdkDragDrop<string[]>) {
     if (event.previousContainer === event.container) {
@@ -91,6 +135,8 @@ export class GameComponent {
         event.previousIndex,
         event.currentIndex,
       );
+    } else {
+      this.snackbar.open('¡Capacidad máxima de la cápsula alcanzada!', 'Aceptar', { duration: 1500 })
     }
   }
 
@@ -105,10 +151,15 @@ export class GameComponent {
         event.currentIndex,
       );
     }
+    //this.defineWon();
   }
 
   moveTo() {
-    if (this.capsule.length < 1) return;
+    if (this.capsule.length < 1) {
+      this.snackbar.open('La cápsula no puede dirigirse hacia el otro laboratorio sin tripulantes.',
+        'Aceptar', { duration: 2000 });
+      return;
+    }
 
     this.isMoving = true;
 
@@ -118,13 +169,25 @@ export class GameComponent {
     //const previousLab = (this.capsuleDirection) ? this.lab1.nativeElement : this.lab2.nativeElement;
     const animationClass = (this.capsuleDirection) ? 'move-to-right' : 'move-to-left';
 
+    this.counter++;
     this.renderer.addClass(div, animationClass);
     setTimeout(() => {
       this.renderer.appendChild(target, div);
       this.renderer.removeClass(div, animationClass);
+
+      if (this.capsuleDirection) {
+        this.scientistAndRobotsRight.push(...this.capsule);
+        this.capsule = [];
+      } else {
+        this.scientistAndRobotsLeft.push(...this.capsule);
+        this.capsule = [];
+      }
+
       this.capsuleDirection = !this.capsuleDirection;
       this.isMoving = false;
-      this.counter++;
+
+      this.defineLost();
+      this.defineWon();
       //this.renderer.addClass(previousLab, 'inactive');
       //this.renderer.removeClass(targetLab, 'inactive');
       }, 500);
@@ -142,39 +205,6 @@ export class GameComponent {
     this.capsuleDirection = true;
     this.isMoving = false;
     this.counter = 0;
+    this.gameState = 'running';
   }
-
 }
-
-@Component({
-  selector: 'app-dialog',
-  standalone: true,
-  styleUrl:"./game.component.scss",
-  template:  `
-  <mat-dialog-content>
-    @if (statusGame) {
-      <h2 mat-dialog-title>¡HAZ GANADO!</h2>
-    }@else {
-      <h2 mat-dialog-title>¡HAZ PERDIDO!</h2>
-    }
-    <mat-dialog-actions>
-      <button mat-button mat-dialog-close (click)="dialogRef.close(false)">
-        <mat-icon>home</mat-icon>
-        Volver al inicio
-      </button>
-      <button mat-button mat-dialog-close (click)="dialogRef.close(true)">
-        <mat-icon>restart_alt</mat-icon>
-        Nueva Partida
-      </button>
-    </mat-dialog-actions>
-    <mat-dialog-content>
-  `,
-  imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose, MatButtonModule,MatIconModule],
-  
-})
-export class DialogCustom {
-  dialogRef = inject(MatDialogRef<DialogCustom>);
-
-  statusGame : boolean = true
-}
-
