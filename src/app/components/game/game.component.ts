@@ -163,7 +163,7 @@ export class GameComponent {
         Volver al inicio
       </button>
       <button mat-button mat-dialog-close (click)="dialogRef.close(true)">
-        <mat-icon>reset</mat-icon>
+        <mat-icon>restart_alt</mat-icon>
         Nueva Partida
       </button>
     </mat-dialog-actions>
